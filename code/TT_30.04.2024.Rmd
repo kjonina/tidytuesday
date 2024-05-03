@@ -1,0 +1,237 @@
+---
+title: "Untitled"
+author: "Karina Jonina"
+date: "2024-04-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(janitor)
+library(here)
+library(fs)
+library(writexl)
+library(withr)
+
+working_dir <- here::here("data", "2024", "2024-04-30")
+
+url <- "https://databank.worldbank.org/data/download/WWBI_CSV.zip"
+
+file_path <- withr::local_tempfile(fileext = ".zip")
+download.file(url, file_path)
+
+extract_dir <- withr::local_tempdir("csvs")
+unzip(file_path, exdir = extract_dir)
+
+wwbi_country <- readr::read_csv(
+  fs::path(extract_dir, "WWBICountry.csv")
+) |> 
+  janitor::clean_names() |> 
+  janitor::remove_empty("cols") |> 
+  dplyr::mutate(
+    # Several columns are years, make them integers
+    national_accounts_reference_year = as.integer(national_accounts_reference_year),
+    latest_industrial_data = as.integer(latest_industrial_data),
+    latest_trade_data = as.integer(latest_trade_data),
+    latest_population_census_year = as.integer(stringr::str_extract(
+      latest_population_census,
+      "^\\d{4}"
+    )),
+    latest_agricultural_census = as.integer(stringr::str_extract(
+      latest_agricultural_census,
+      "^\\d{4}"
+    )),
+    national_accounts_base_year = as.integer(stringr::str_extract(
+      national_accounts_base_year,
+      "^\\d{4}"
+    )),
+    system_of_national_accounts = as.integer(stringr::str_extract(
+      system_of_national_accounts,
+      "\\d{4}"
+    )),
+    latest_population_census_notes = stringr::str_remove(
+      latest_population_census,
+      "^\\d{4}\\.?\\s*"
+    ),
+    latest_population_census_notes = dplyr::na_if(
+      latest_population_census_notes,
+      ""
+    ),
+    # vital_registration_complete is either "yes" or "NA"
+    vital_registration_complete = !is.na(vital_registration_complete) 
+  ) |> 
+  dplyr::select(-"latest_population_census")
+
+wwbi_series <- readr::read_csv(
+  fs::path(extract_dir, "WWBISeries.csv"),
+  col_types = paste(rep("c", 21), collapse = "")
+) |> 
+  janitor::clean_names() |> 
+  janitor::remove_empty("cols") |> 
+  dplyr::rename(indicator_code = "series_code")
+
+wwbi_data <- readr::read_csv(
+  fs::path(extract_dir, "WWBIData.csv"),
+  col_types = paste(c(rep("c", 4), rep("d", 21), "c"), collapse = "")
+) |> 
+  janitor::clean_names() |> 
+  # indicator_name and country_name are redundant.
+  dplyr::select(-"indicator_name", -"country_name") |> 
+  janitor::remove_empty("cols") |> 
+  tidyr::pivot_longer(
+    cols = -c(country_code, indicator_code),
+    names_to = "year",
+    names_transform = ~ as.integer(stringr::str_remove(.x, "x")),
+    values_to = "value"
+  ) |> 
+  dplyr::filter(!is.na(value))
+
+if (!dir.exists(working_dir)) {
+  dir.create(working_dir, recursive = TRUE)
+}
+readr::write_csv(
+  wwbi_data,
+  fs::path(working_dir, "wwbi_data.csv")
+)
+readr::write_csv(
+  wwbi_series,
+  fs::path(working_dir, "wwbi_series.csv")
+)
+readr::write_csv(
+  wwbi_country,
+  fs::path(working_dir, "wwbi_country.csv")
+)
+```
+
+
+```{r}
+wwbi_country
+```
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
