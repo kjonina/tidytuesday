@@ -17,3 +17,5 @@ If you are using TidyTuesday to teach data-related skills, [please let us know](
 Click on header or the chart for the code.
 
 [2024-04-30: Worldwide Bureaucracy Indicators](code/2024_04_30_tidy_tuesday.Rmd)
+
+## [2024-04-30: Worldwide Bureaucracy Indicators](https://github.com/kjonina/tidytuesday/blob/master/code/2024_04_30_tidy_tuesday.Rmd)
