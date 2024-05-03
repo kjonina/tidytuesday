@@ -124,7 +124,7 @@ df
 Using your processed dataset, create your unique visualization.
 
 ```{R Setting Saving Options}
-camcorder::gg_record(dir = here("outputs","2024-04-30"),
+camcorder::gg_record(dir = here("outputs"),
   device = "png",
   width = 8, height = 7,
   units = "in", dpi = 320
