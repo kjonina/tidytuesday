@@ -18,4 +18,4 @@ Click on header or the chart for the code.
 
 [2024-04-30: Worldwide Bureaucracy Indicators](code/2024_04_30_tidy_tuesday.Rmd)
 
-## [2024-04-30: Worldwide Bureaucracy Indicators](https://github.com/kjonina/tidytuesday/blob/master/code/2024_04_30_tidy_tuesday.Rmd)
+## [2024-04-30: Worldwide Bureaucracy Indicators](https://github.com/kjonina/tidytuesday/blob/master/code/World_Bureacracy_Indicators_2024_04_30)
