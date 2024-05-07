@@ -57,13 +57,13 @@ MN <- str_glue("<span style='font-family:fa-brands'>&#xf4f6;</span>")
 DT <- str_glue("<span style='font-family:fa-brands'>&#xf1c0;</span>")
 
 tt_caption <- str_glue(
-  "Karina Jonina #TidyTuesday 2024-30-04<br>
+  "Karina Jonina #TidyTuesday 2024-05_07<br>
   {X} @karinajonina {GH} @kjonina {MN} @kjonina<br>
   Data: {tt_source}
   "
 )
 
-tt_title_text    <- str_glue("Rolling Stones Top 500 Albums")
+tt_title_text    <- str_glue("Rolling Stones: Beatles Albums Ranked")
 
 ```
 
@@ -100,9 +100,10 @@ tt %>%
 rolling_stone <- tt$rolling_stone
 
 ```
+
 # Exploring Data
 
-```{r Cleaning Data}
+```{r Exploring Data}
 
 
 df <- rolling_stone %>%
@@ -120,20 +121,18 @@ df <- rolling_stone %>%
 
 
 
-rolling_stone %>% 
-  filter(grepl("Rock", genre, ignore.case = TRUE))
-	
-
-
 albums_not_on_spotify <- rolling_stone %>%
   filter(is.na(spotify_popularity)) 
 
-
-
+	
 ```
 
 
-```{r}
+```{r}  
+#################################
+# Pivoting
+#################################
+
 rolling_stone_pivot_longer <-rolling_stone %>%
   mutate(across(c(rank_2003, rank_2012, rank_2020), ~replace(., is.na(.), 501))) %>%
   pivot_longer(cols = c(rank_2003, rank_2012, rank_2020),
@@ -143,6 +142,11 @@ rolling_stone_pivot_longer <-rolling_stone %>%
          rank_year = if_else(rank_year == "rank_2003", "2003", rank_year)) %>%
   mutate(rank_year = as.factor(rank_year)) %>%
   mutate(rank_year = fct_relevel(rank_year, "2003", "2012", "2020")) 
+
+```  
+
+
+```{r}
 
 
 #################################
@@ -154,6 +158,7 @@ artists_with_most_albums_in_Top10 <- rolling_stone_pivot_longer %>%
   arrange(desc(count)) %>%
   head(10)
 
+#################################
 Album_with_most_weeks_on_billboard <- rolling_stone_pivot_longer %>%
   select(album, clean_name, weeks_on_billboard,release_year,  rank ) %>%
   filter(!is.na(rank)) %>%
@@ -171,9 +176,6 @@ is_elvis_dead <- rolling_stone_pivot_longer %>%
   filter(!is.na(rank)) %>%
   select(clean_name, album, release_year, rank_year, rank)
 
-
-
-
 #################################
 # My favourite artists
 #################################
@@ -185,35 +187,32 @@ favourites <- rolling_stone_pivot_longer %>%
   select(clean_name, album, release_year, rank_year, rank)
 
 
-
-
 #################################
 # Is Rock'n'Roll Dead?
 #################################
 
 is_rock_n_roll_dead <- rolling_stone_pivot_longer %>%
-  filter(!is.na(rank)) %>%
   select(clean_name, album, genre, rank_year, rank)%>%
   mutate(rock_status = if_else(str_detect(str_to_lower(genre), "rock n' roll"), "Rock n' Roll", "not Rock n' Roll")) %>%
-  replace_na(list(rock_status = "Unknown")) %>%
-  filter(!is.na(rank))
-
+  replace_na(list(rock_status = "Unknown")) 
+  
 #################################
 is_rock_n_roll_dead_2 <- is_rock_n_roll_dead %>%
   filter(rock_status == "Rock n' Roll") %>%
   mutate(album_artist = paste(album, clean_name, sep = " - ")) %>%
   arrange(desc(rank_year), rank)
 
-
-ggplot(is_rock_n_roll_dead_2, aes(x = rank_year, y = rank, color = album_artist)) + 
-  geom_point() +
-  geom_line(aes(x = rank_year, y = rank, color = album_artist)) +
-  labs(title = "Scatter Plot of Rank Over Years",
-       x = "Year",
-       y = "Rank",
-       color = "Group") +
-  theme_minimal()
+# 
+# ggplot(is_rock_n_roll_dead_2, aes(x = rank_year, y = rank, color = album_artist)) + 
+#   geom_point() +
+#   geom_line(aes(x = rank_year, y = rank, color = album_artist)) +
+#   labs(title = "Scatter Plot of Rank Over Years",
+#        x = "Year",
+#        y = "Rank",
+#        color = "Group") +
+#   theme_minimal()
 ```
+
 ```{r}
 top_20_albums_in_2003 <- rolling_stone_pivot_longer %>%
   filter(rank_year == "2003") %>%
@@ -244,24 +243,54 @@ ggplot(top_20_albums_in_2003_charts, aes(x = rank_year, y = rank, color = album_
 ```
 
 
+
+# The Beatles
+``` {r}
+# How has the ranking change for the Beatles' albums?
+beatles_df <- rolling_stone_pivot_longer %>%
+  filter(clean_name == "The Beatles") %>%
+  select(clean_name, album, release_year, rank_year, rank)
+
+number_of_beatles_albums <- length(unique(beatles_df$album))
+
+beatles_df_status <- rolling_stone_pivot_longer %>%
+  select(clean_name, album, genre, rank_year, rank)%>%
+  mutate(rock_status = if_else(str_detect(str_to_lower(clean_name), "the beatles"), "The Beatles", "Not The Beatles")) %>%
+  mutate(rock_status = as.factor(rock_status)) %>%
+  mutate(rock_status = fct_relevel(rock_status, "The Beatles", "Not The Beatles"))
+
+
+ggplot(beatles_df, aes(x = rank_year, y = rank, color = album)) + 
+  geom_point() +
+  geom_line() +
+  labs(title = "Scatter Plot of Rank Over Years",
+       x = "Year",
+       y = "Rank",
+       color = "Group") +
+  theme_minimal()
+
+
+
+```
+
 # Visualize
 
 Using your processed dataset, create your unique visualization.
 
 ```{R Setting Saving Options}
-camcorder::gg_record(dir = here("outputs"),
-  device = "png",
-  width = 8, height = 7,
-  units = "in", dpi = 320
-  )
+camcorder::gg_record(dir = here("outputs","2023-05-07"),
+                     device = "png",
+                     width = 8, height = 8,
+                     units = "in", dpi = 320
+)
 ```
   
 
 
 ```{r}
 
-df %>%
-ggplot(aes(x = table_name, y = value)) +
+beatles_df %>%
+ggplot(aes(x = rank_year, y = rank, color = album)) +
   geom_line(linewidth=1.25) +
   
 
@@ -269,44 +298,46 @@ ggplot(aes(x = table_name, y = value)) +
        # subtitle = tt_subtitle_text,
        caption = tt_caption,
        colour = "",
-       x = "Countries",
-       y = "Cumulative Count") + 
+       x = "Year",
+       y = "Rolling Stones Ranking") + 
  theme( 
    
     plot.background = element_rect(colour=bg_color,fill = bg_color),
     panel.background = element_rect(colour=bg_color,fill = bg_color),
     
+# Title
     plot.title.position = "plot",
     plot.title = element_textbox_simple(
       halign = 0.5,
       tt_family_2,
       color = txt_color,
       face = "bold",
-      size = 100,
+      size = 20,
       margin = margin(t = 2, r = 0, b = 0, l = 0)
     ),
     
-    plot.subtitle = element_textbox_simple(
-      halign = 0.5,
-      tt_family,
-      color = txt_color2,
-      #face = "bold",
-      size = 80,
-      margin = margin(t = 1, r = 0, b = 2, l = 0)
-    ),
+# Subtitle
+    # plot.subtitle = element_textbox_simple(
+    #   halign = 0.5,
+    #   tt_family,
+    #   color = txt_color2,
+    #   #face = "bold",
+    #   size = 80,
+    #   margin = margin(t = 1, r = 0, b = 2, l = 0)
+    # ),
     
     plot.caption = element_textbox_simple(
       family = tt_family, 
       color = txt_color,
-      size = 25,
+      size = 15,
       lineheight = 0.25,
       margin = margin(t = 1, r = 0, b = 1, l = 2)
     ),
     
-    axis.text.x = element_text(size=40,family = tt_family),
-    axis.text.y = element_text(size=30,family = tt_family),
-    axis.title.x = element_text(size=40,family = tt_family),
-    axis.title.y = element_text(size=30,family = tt_family),
+    axis.text.x = element_text(size=10,family = tt_family),
+    axis.text.y = element_text(size=10,family = tt_family),
+    axis.title.x = element_text(size=10,family = tt_family),
+    axis.title.y = element_text(size=10,family = tt_family),
     panel.grid.major.y = element_line(colour="black", size=0.1),
     panel.grid.major.x = element_blank(),
 

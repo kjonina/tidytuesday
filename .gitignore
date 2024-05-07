@@ -1,5 +1,6 @@
 # History files
 /data
+/outputs/*
 .Rhistory
 .Rapp.history
 # R project
