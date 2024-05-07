@@ -97,13 +97,152 @@ tt %>%
 # Wrangle
 
 ```{r Wrangle}
+rolling_stone <- tt$rolling_stone
 
 ```
-# Cleaning Data
+# Exploring Data
 
 ```{r Cleaning Data}
 
+
+df <- rolling_stone %>%
+  select(release_year, genre, spotify_popularity) %>%
+  filter(!is.na(spotify_popularity)) %>%
+  group_by(release_year, genre) %>%
+  summarise(count = n(),
+            min_spotify_popularity = min(spotify_popularity, na.rm = TRUE),
+            median_spotify_popularity = median(spotify_popularity, na.rm = TRUE),
+            mean_spotify_popularity = mean(spotify_popularity, na.rm = TRUE),
+            max_spotify_popularity = max(spotify_popularity, na.rm = TRUE),
+            std_spotify_popularity = sd(spotify_popularity, na.rm = TRUE)
+            ) %>%
+  ungroup()
+
+
+
+rolling_stone %>% 
+  filter(grepl("Rock", genre, ignore.case = TRUE))
+	
+
+
+albums_not_on_spotify <- rolling_stone %>%
+  filter(is.na(spotify_popularity)) 
+
+
+
 ```
+
+
+```{r}
+rolling_stone_pivot_longer <-rolling_stone %>%
+  mutate(across(c(rank_2003, rank_2012, rank_2020), ~replace(., is.na(.), 501))) %>%
+  pivot_longer(cols = c(rank_2003, rank_2012, rank_2020),
+               names_to = "rank_year", values_to = "rank") %>%
+  mutate(rank_year = if_else(rank_year == "rank_2020", "2020", rank_year),
+         rank_year = if_else(rank_year == "rank_2012", "2012", rank_year),
+         rank_year = if_else(rank_year == "rank_2003", "2003", rank_year)) %>%
+  mutate(rank_year = as.factor(rank_year)) %>%
+  mutate(rank_year = fct_relevel(rank_year, "2003", "2012", "2020")) 
+
+
+#################################
+artists_with_most_albums_in_Top10 <- rolling_stone_pivot_longer %>%
+  select(clean_name,rank_year, rank ) %>%
+  filter(!is.na(rank)) %>%
+  group_by(clean_name) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>%
+  head(10)
+
+Album_with_most_weeks_on_billboard <- rolling_stone_pivot_longer %>%
+  select(album, clean_name, weeks_on_billboard,release_year,  rank ) %>%
+  filter(!is.na(rank)) %>%
+  arrange(desc(weeks_on_billboard)) %>%
+  distinct(clean_name, album,release_year, weeks_on_billboard) %>%
+  head(20)
+
+
+#################################
+# Is Elvis Dead?
+#################################
+
+is_elvis_dead <- rolling_stone_pivot_longer %>%
+  filter(clean_name == "Elvis Presley") %>%
+  filter(!is.na(rank)) %>%
+  select(clean_name, album, release_year, rank_year, rank)
+
+
+
+
+#################################
+# My favourite artists
+#################################
+my_favourite_artist <- c("Adele", "Taylor Swift", "Rihanna", "Linkin Park","Chris Cornell", "Soundgarden",  "Dua Lipa")
+
+favourites <- rolling_stone_pivot_longer %>%
+  filter(clean_name %in% my_favourite_artist) %>%
+  filter(!is.na(rank)) %>%
+  select(clean_name, album, release_year, rank_year, rank)
+
+
+
+
+#################################
+# Is Rock'n'Roll Dead?
+#################################
+
+is_rock_n_roll_dead <- rolling_stone_pivot_longer %>%
+  filter(!is.na(rank)) %>%
+  select(clean_name, album, genre, rank_year, rank)%>%
+  mutate(rock_status = if_else(str_detect(str_to_lower(genre), "rock n' roll"), "Rock n' Roll", "not Rock n' Roll")) %>%
+  replace_na(list(rock_status = "Unknown")) %>%
+  filter(!is.na(rank))
+
+#################################
+is_rock_n_roll_dead_2 <- is_rock_n_roll_dead %>%
+  filter(rock_status == "Rock n' Roll") %>%
+  mutate(album_artist = paste(album, clean_name, sep = " - ")) %>%
+  arrange(desc(rank_year), rank)
+
+
+ggplot(is_rock_n_roll_dead_2, aes(x = rank_year, y = rank, color = album_artist)) + 
+  geom_point() +
+  geom_line(aes(x = rank_year, y = rank, color = album_artist)) +
+  labs(title = "Scatter Plot of Rank Over Years",
+       x = "Year",
+       y = "Rank",
+       color = "Group") +
+  theme_minimal()
+```
+```{r}
+top_20_albums_in_2003 <- rolling_stone_pivot_longer %>%
+  filter(rank_year == "2003") %>%
+  filter(rank != 501) %>%
+  select(clean_name, album, rank_year, rank) %>%
+  arrange(rank) %>%
+  head(20) %>%
+  select(album) %>%
+  pull()
+
+
+
+# How do they hold up in 2012 and 2020
+#################################
+top_20_albums_in_2003_charts <- rolling_stone_pivot_longer %>%
+  filter(album %in% top_20_albums_in_2003) %>%
+  select(clean_name, album, rank_year, rank) %>%
+  mutate(album_artist = paste(album, clean_name, sep = " - ")) 
+
+ggplot(top_20_albums_in_2003_charts, aes(x = rank_year, y = rank, color = album_artist)) + 
+  geom_point() +
+  geom_line(aes(x = rank_year, y = rank, color = album_artist)) +
+  labs(title = "Scatter Plot of Rank Over Years",
+       x = "Year",
+       y = "Rank",
+       color = "Group") +
+  theme_minimal()
+```
+
 
 # Visualize
 
@@ -124,14 +263,14 @@ camcorder::gg_record(dir = here("outputs"),
 df %>%
 ggplot(aes(x = table_name, y = value)) +
   geom_line(linewidth=1.25) +
-#   
+  
 
   labs(title = tt_title_text,
        # subtitle = tt_subtitle_text,
        caption = tt_caption,
        colour = "",
-       # x = "Countries",
-       # y = "Cumulative Count") + 
+       x = "Countries",
+       y = "Cumulative Count") + 
  theme( 
    
     plot.background = element_rect(colour=bg_color,fill = bg_color),
