@@ -71,10 +71,12 @@ tt_title_text    <- str_glue("Coffee")
 
 ```{r Load}
 tt <- tidytuesdayR::tt_load('2024-05-14')
+
+
 ## OR
 tuesdata <- tidytuesdayR::tt_load(2024, week = 20)
 
-coffee_survey <- tuesdata$coffee_survey
+tt <- tuesdata$coffee_survey
 ```
 
 
