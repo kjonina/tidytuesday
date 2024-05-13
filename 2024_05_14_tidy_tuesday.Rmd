@@ -70,13 +70,9 @@ tt_title_text    <- str_glue("Coffee")
 # Load the weekly Data
 
 ```{r Load}
-tt <- tidytuesdayR::tt_load('2024-05-14')
+tt <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-05-14/coffee_survey.csv")
 
 
-## OR
-tuesdata <- tidytuesdayR::tt_load(2024, week = 20)
-
-tt <- tuesdata$coffee_survey
 ```
 
 
