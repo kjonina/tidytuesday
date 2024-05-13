@@ -278,7 +278,7 @@ ggplot(beatles_df, aes(x = rank_year, y = rank, color = album)) +
 Using your processed dataset, create your unique visualization.
 
 ```{R Setting Saving Options}
-camcorder::gg_record(dir = here("outputs","2023-05-07"),
+camcorder::gg_record(dir = here("outputs","2023-05-"),
                      device = "png",
                      width = 8, height = 8,
                      units = "in", dpi = 320
@@ -291,7 +291,7 @@ camcorder::gg_record(dir = here("outputs","2023-05-07"),
 
 beatles_df %>%
 ggplot(aes(x = rank_year, y = rank, color = album)) +
-  geom_line(linewidth=1.25) +
+  geom_point() +
   
 
   labs(title = tt_title_text,
@@ -341,7 +341,7 @@ ggplot(aes(x = rank_year, y = rank, color = album)) +
     panel.grid.major.y = element_line(colour="black", size=0.1),
     panel.grid.major.x = element_blank(),
 
-    plot.caption.position = "plot",
+    # plot.caption.position = "plot",
     legend.position = "none"
     
 

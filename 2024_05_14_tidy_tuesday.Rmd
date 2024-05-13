@@ -1,0 +1,97 @@
+---
+title: "TidyTemplate"
+date: 2024-05-03
+output: html_document
+---
+
+# Worldwide Bureaucracy Indicators
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tidytuesdayR)
+library(camcorder)
+library(here)
+library(glue)
+library(ggtext)
+library(showtext)
+library(extrafont)
+library(geomtextpath)
+
+```
+
+
+
+```{r}
+tt_source <- "Coffee"  
+bg_color <- "#ffffff"
+txt_color <- "black"
+txt_color2 <- "#20C29D"
+
+yellow <- "#FFB702"  
+blue <- "#1E9BD5"
+green <- "#20C29D"
+light_blue <- "#00E7EC"
+red <- "#FF5674"
+
+tt_family <- "montserrat"
+tt_family_2 <-  "roboto"
+
+
+font_add_google("Montserrat", tt_family)
+font_add_google("Roboto", tt_family_2)
+
+# font_add("fa-brands",
+#          regular = here("Assets","Fonts","fontawesome-free-6.4.2-web","webfonts","fa-brands-400.ttf"))
+# font_add("fa-solid",
+#          regular = here("Assets","Fonts","fontawesome-free-6.4.2-web","webfonts","fa-solid-900.ttf"))
+# font_add("fa-regular",
+#          regular = here("Assets","Fonts","fontawesome-free-6.4.2-web","webfonts","fa-regular-400.ttf"))
+# showtext_auto(enable = T) 
+
+X  <- str_glue("<span style='font-family:fa-brands'>&#xe61b;</span>")
+GH <- str_glue("<span style='font-family:fa-brands'>&#xf09b;</span>")
+MN <- str_glue("<span style='font-family:fa-brands'>&#xf4f6;</span>")
+DT <- str_glue("<span style='font-family:fa-brands'>&#xf1c0;</span>")
+
+tt_caption <- str_glue(
+  "Karina Jonina #TidyTuesday 2024-05_07<br>
+  {X} @karinajonina {GH} @kjonina {MN} @kjonina<br>
+  Data: {tt_source}
+  "
+)
+
+tt_title_text    <- str_glue("Coffee")
+
+```
+
+# Load the weekly Data
+
+```{r Load}
+tt <- tidytuesdayR::tt_load('2024-05-14')
+## OR
+tuesdata <- tidytuesdayR::tt_load(2024, week = 20)
+
+coffee_survey <- tuesdata$coffee_survey
+```
+
+
+# Readme
+
+```{r Readme, eval = interactive()}
+
+tt
+
+```
+
+
+# Glimpse Data
+
+```{r Glimpse}
+
+tt %>% 
+  map(glimpse)
+
+```
